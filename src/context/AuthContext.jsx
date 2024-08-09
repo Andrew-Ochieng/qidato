@@ -1,80 +1,66 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// src/context/AuthContext.js
+import React, { createContext, useState } from 'react';
+import publicAxios from '../api/publicAxios';
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const navigate = useNavigate();
+    const [token, setToken] = useState(localStorage.getItem('token') || null);
 
-    useEffect(() => {
-        const token = localStorage.getItem('token');
+    const login = async (email, password) => {
+        try {
+            const response = await publicAxios.post('/auth/token/login/', { email, password });
+            const { auth_token } = response.data;
+            setToken(auth_token);
+            localStorage.setItem('token', auth_token);
+            await getUser();
+        } catch (error) {
+            console.error("Login failed:", error.response?.data);
+        }
+    };
+
+    const register = async (email, password) => {
+        try {
+            await publicAxios.post('/auth/users/', { email, password });
+            await login(email, password); // Automatically log in after registration
+        } catch (error) {
+            console.error('Registration failed:', error.response?.data);
+            throw error; // Re-throw to be handled in the component
+        }
+    };
+
+    const getUser = async () => {
         if (token) {
-            axios.get('http://localhost:8000/dj-rest-auth/user/', {
-                headers: { Authorization: `Token ${token}` }
-            })
-            .then(response => {
+            try {
+                const response = await publicAxios.get('/auth/users/me/', {
+                    headers: {
+                        Authorization: `Token ${token}`,
+                    },
+                });
                 setUser(response.data);
-            })
-            .catch(error => {
-                console.error('Token expired or invalid', error);
-                // localStorage.removeItem('token');
-            });
-        }
-    }, []);
-
-
-    const register = async (username, email, password1, password2) => {
-        try {
-            const response = await axios.post('http://localhost:8000/dj-rest-auth/registration/', {
-                username,
-                email,
-                password1,  // First password input
-                password2   // Confirmation password input
-            });
-            
-            console.log(response.data); // Check what the API returns
-
-            // Assuming response.data contains the token and user details
-            localStorage.setItem('token', response.data.key);
-            setUser(response.data.user);
-
-            navigate('/dashboard');
-        } catch (error) {
-            console.error('Registration failed', error.response.data);
+            } catch (error) {
+                console.error("Fetching user failed:", error.response?.data);
+            }
         }
     };
-    
 
-    const login = async (username, password) => {
-        try {
-            const response = await axios.post('http://localhost:8000/dj-rest-auth/login/', { username, password });
-            localStorage.setItem('token', response.data.key);
-            setUser(response.data.user);
-            // window.location.href = '/dashboard';
-            navigate('/dashboard');
-        } catch (error) {
-            console.error('Login failed', error);
-        }        
-    };
-
-    const logout = async () => {
-        try {
-            await axios.post('http://localhost:8000/dj-rest-auth/logout/', null, {
-                headers: { Authorization: `Token ${localStorage.getItem('token')}` }
-            });
-            localStorage.removeItem('token');
-            setUser(null);
-            navigate('/login');
-        } catch (error) {
-            console.error('Logout failed', error);
-        }
+    const logout = () => {
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem('token');
+        publicAxios.post('/auth/token/logout/', {}, {
+            headers: {
+                Authorization: `Token ${token}`,
+            },
+        });
     };
 
     return (
-        <AuthContext.Provider value={{ user, register, login, logout }}>
+        <AuthContext.Provider value={{ user, token, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );
 };
+
+export default AuthContext;

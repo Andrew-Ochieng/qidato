@@ -1,26 +1,24 @@
-import { Route, Routes } from 'react-router-dom'
-import './App.css'
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
+import Login from './pages/auth/Login';
+import DashboardRedirect from './components/DashbaoardRedirect';
+import TeacherDashboard from './pages/teachers/TeacherDashboard';
+import StudentDashboard from './pages/students/StudentDashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Navbar } from './components/Navbar'
-import { Landing } from './pages/landing/Landing';
-import { Login }   from './pages/auth/Login';
-import { Dashboard } from './pages/dashboard/Dashboard';
-import { Suspense } from 'react';
-import { Register } from './pages/auth/Register';
+import Register from './pages/auth/Register';
 
-function App() {
- 
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Navbar />
-      <Routes>
-        <Route path='/' element={ <Landing /> } />
-        <Route path='/login' element={ <Login /> } />
-        <Route path='/register' element={ <Register /> } />
-        <Route path='/dashboard' element={ <Dashboard /> } />
-      </Routes>
-    </Suspense>
-  )
-}
+const App = () => {
+    return (
+        <div className="App">
+            <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/dashboard-redirect" element={<DashboardRedirect />} />
+                <Route path="/teachers/dashboard" element={<TeacherDashboard />} />
+                <Route path="/students/dashboard" element={<StudentDashboard />} />
+            </Routes>
+        </div>
+    );
+};
 
-export default App
+export default App;

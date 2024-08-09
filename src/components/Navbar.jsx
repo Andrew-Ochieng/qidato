@@ -1,46 +1,32 @@
-
-import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { AuthContext } from '../context/AuthContext'
+import AuthContext from '../context/AuthContext';
+import { useContext } from 'react';
 
 export const Navbar = () => {
-    const { user, logout } = useContext(AuthContext)
-    
-    console.log(user)
-  return (
-    <nav class="navbar navbar-expand-lg bg-info">
-        <div class="container-fluid">
-            <Link to='/' class="navbar-brand">Home</Link>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    const { user, logout } = useContext(AuthContext);
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
-                </li>
-            </ul>
-            </div>
+    return (
+        <nav className="navbar navbar-expand-lg bg-info">
+            <div className="container-fluid">
+                <Link to="/" className="navbar-brand">Home</Link>
 
-            {user ? (
-                <div className='d-flex gap-2 align-items-center'>
-                    <div>
-                        Hello {user.username}
+                <div className="collapse navbar-collapse" id="navbarNav">
+                    <ul className="navbar-nav">
+                        <li className="nav-item">
+                            <a className="nav-link active" aria-current="page" href="#">Home</a>
+                        </li>
+                    </ul>
+                </div>
+
+                {user && (
+                    <div className="d-flex gap-2 align-items-center">
+                        <div>
+                            Hello {user.username}
+                        </div>
+                        <button onClick={logout} className="btn btn-danger">Logout</button>
                     </div>
-                    <button onClick={logout} className='btn btn-danger'>Logout</button>
-                </div>
-            ) : (
-                <div className='d-flex gap-2'>
-                    <Link to='/login' className='btn btn-xs btn-success md-block hidden'>
-                        Login
-                    </Link>
-                    <Link to='/register' className='btn btn-success md-block hidden'>
-                        Register
-                    </Link>
-                </div>
-            )}
-        </div>
-    </nav>
-  )
-}
+                )}
+            </div>
+        </nav>
+    );
+};
