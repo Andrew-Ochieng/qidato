@@ -1,15 +1,15 @@
-// src/components/Register.jsx
 import React, { useState, useContext } from 'react';
 import AuthContext from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
     const { register } = useContext(AuthContext);
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [isStudent, setIsStudent] = useState(false);
+    const [isTeacher, setIsTeacher] = useState(false);
     const [error, setError] = useState('');
-    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,9 +20,8 @@ const Register = () => {
         }
 
         try {
-            await register(email, password);
-            
-            navigate('/dashboard-redirect');
+            await register(username, email, password, isStudent, isTeacher);
+            console.log(username)
         } catch (error) {
             setError('Registration failed. Please try again.');
         }
@@ -33,6 +32,17 @@ const Register = () => {
             <h2>Register</h2>
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                    <label htmlFor="username" className="form-label">Username</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                    />
+                </div>
                 <div className="mb-3">
                     <label htmlFor="email" className="form-label">Email</label>
                     <input
@@ -65,6 +75,30 @@ const Register = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                     />
+                </div>
+                <div className="mb-3">
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={isStudent}
+                            onChange={() => {
+                                setIsStudent(!isStudent);
+                                setIsTeacher(false);
+                            }}
+                        />
+                        Student
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={isTeacher}
+                            onChange={() => {
+                                setIsTeacher(!isTeacher);
+                                setIsStudent(false);
+                            }}
+                        />
+                        Teacher
+                    </label>
                 </div>
                 <button type="submit" className="btn btn-primary">Register</button>
             </form>

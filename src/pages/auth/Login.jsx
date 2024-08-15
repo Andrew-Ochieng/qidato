@@ -1,19 +1,17 @@
 import React, { useState, useContext } from 'react';
 import AuthContext from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const { login } = useContext(AuthContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         try {
             await login(email, password);
-            navigate('/dashboard-redirect');
         } catch (error) {
             setError('Login failed. Please check your credentials and try again.');
         }
@@ -21,6 +19,7 @@ const Login = () => {
 
     return (
         <div className="container">
+            <h2>Login</h2>
             {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">

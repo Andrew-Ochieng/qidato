@@ -1,63 +1,100 @@
-// src/context/AuthContext.js
-import React, { createContext, useState } from 'react';
-import publicAxios from '../api/publicAxios';
+import React, { createContext, useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { baseUrl } from '../api/baseUrl';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('token') || null);
+    const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
+    const [authTokens, setAuthTokens] = useState(() => JSON.parse(localStorage.getItem('authTokens')) || null);
+    const navigate = useNavigate();
+
+
+    useEffect(() => {
+        if (authTokens !== null) {
+            const storedUser = JSON.parse(localStorage.getItem('user'));
+            const storedTokens = JSON.parse(localStorage.getItem('authTokens'));
+            if (storedUser && storedTokens) {
+                setUser(storedUser);
+                setAuthTokens(storedTokens);
+                if (storedUser.role === 'student' ) {
+                    navigate('/student/dashboard');
+                } else if (storedUser.role === 'teacher' ) {
+                    navigate('/teacher/dashboard');
+                } else {
+                    navigate('/');
+                }
+            }
+            
+            // console.log(storedUser.role)
+        } 
+
+        if (authTokens) {
+            axios.defaults.headers.common['Authorization'] = `Token ${authTokens}`;
+        } else {
+            delete axios.defaults.headers.common['Authorization'];
+        }
+    }, [authTokens, navigate]);
+
+
+    const register = async (username, email, password, isStudent, isTeacher) => {
+        try {
+            const role = isStudent ? 'student' : isTeacher ? 'teacher' : '';
+            const response = await axios.post(`${baseUrl}/auth/register/`, {
+                username,
+                email,
+                password,
+                role,
+            });
+            setUser(response.data);
+            navigate('/');
+        } catch (error) {
+            throw error;
+        }
+    };
 
     const login = async (email, password) => {
         try {
-            const response = await publicAxios.post('/auth/token/login/', { email, password });
-            const { auth_token } = response.data;
-            setToken(auth_token);
-            localStorage.setItem('token', auth_token);
-            await getUser();
-        } catch (error) {
-            console.error("Login failed:", error.response?.data);
-        }
-    };
+            const response = await axios.post(`${baseUrl}/auth/login/`, {
+                username: email,
+                password
+            });
+            setAuthTokens(response.data.token);
+            setUser(response.data);
 
-    const register = async (email, password) => {
-        try {
-            await publicAxios.post('/auth/users/', { email, password });
-            await login(email, password); // Automatically log in after registration
-        } catch (error) {
-            console.error('Registration failed:', error.response?.data);
-            throw error; // Re-throw to be handled in the component
-        }
-    };
-
-    const getUser = async () => {
-        if (token) {
-            try {
-                const response = await publicAxios.get('/auth/users/me/', {
-                    headers: {
-                        Authorization: `Token ${token}`,
-                    },
-                });
-                setUser(response.data);
-            } catch (error) {
-                console.error("Fetching user failed:", error.response?.data);
+            localStorage.setItem('authTokens', JSON.stringify(response.data.token));
+            localStorage.setItem('user', JSON.stringify(response.data))
+            if (response.data.role === 'student' ) {
+                navigate('/student/dashboard');
+            } 
+            if (response.data.role === 'teacher' ) {
+                navigate('/teacher/dashboard');
             }
+        } catch (error) {
+            throw error;
         }
     };
 
-    const logout = () => {
-        setToken(null);
-        setUser(null);
-        localStorage.removeItem('token');
-        publicAxios.post('/auth/token/logout/', {}, {
-            headers: {
-                Authorization: `Token ${token}`,
-            },
-        });
+
+    const logout = async () => {
+        try {
+            await axios.post(`${baseUrl}/auth/logout/`, null, {
+                headers: {
+                    'Authorization': `Token ${authTokens}`
+                }
+            });
+            setAuthTokens(null);
+            setUser(null);
+            localStorage.removeItem('authTokens');
+            navigate('/');
+        } catch (error) {
+            throw error;
+        }
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, register, logout }}>
+        <AuthContext.Provider value={{ user, authTokens, register, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
