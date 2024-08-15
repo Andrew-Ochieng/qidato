@@ -1,17 +1,29 @@
 # Qidato
-    A prototype for school learning system where students can view a report of their attendance and perfomance that incorporates recharts. Functionalities included in the prototype so far are;
 
-    Teachers and students being able to register & login
-    Students can view attendance & perfomance reports
+**Qidato** is a prototype for a school learning system where students can view detailed reports on their attendance and performance, presented through Recharts. The prototype currently includes the following functionalities:
 
-    From the admin panel, teachers can create subjects, delete, modify 
-    Also they can take student attendance
-    They can add student perfomance 
+### Features
+- **User Authentication:** 
+  - Teachers and students can register and log in to the system.
+  
+- **Student Dashboard:**
+  - Students can view their attendance records.
+  - Performance reports are available for students, displaying their results using interactive charts.
+  
+- **Admin Panel (Teachers' Access):**
+  - Teachers can create, modify, and delete subjects.
+  - Student attendance can be recorded and managed by teachers.
+  - Teachers can add and update student performance data.
 
-    ['https://qidato.vabrisetech.com/'](Qidato API Link)
-    Test credentials: 
-    Admin email: admin@mail.com
-    Password: Admin!@#$1234
+### Access the API
+You can access the Qidato API at the following link:
+[Qidato API Link](https://qidato.vabrisetech.com/)
 
-    Student: meghan@mail.com
-    Student password: Meghan@_1234
+### Test Credentials
+- **Admin:**
+  - Email: `admin@mail.com`
+  - Password: `Admin!@#$1234`
+  
+- **Student:**
+  - Email: `meghan@mail.com`
+  - Password: `Meghan@_1234`
